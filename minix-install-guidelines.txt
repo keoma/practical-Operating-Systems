@@ -1,0 +1,27 @@
+
+Installatie virtual box onder Linux:
+
+-Toevoegen van virtual box sources aan /etc/apt/sources.list
+ deb http://download.virtualbox.org/virtualbox/debian oneiric contrib
+
+-apt-get install virtualbox
+ (ref https://www.virtualbox.org/wiki/Linux_Downloads)
+
+
+Installatie minix 3 in virtual box
+ Een van beide references
+ ref http://wiki.minix3.org/en/UsersGuide/RunningMinixOnVirtualBox
+ ref http://www.google.nl/url?sa=t&rct=j&q=install%20minix%20in%20virtualbox&source=web&cd=5&ved=0CE0QFjAE&url=http%3A%2F%2Fwww.securityenhancedminix.com%2Flibrary%2FVirtualBoxMinixBuild.pdf&ei=PwHJTpX7DIqa-wb1s4wV&usg=AFQjCNGAH7sEAqx-_uMCNVFNAIAjrJ2BJg&cad=rja)
+
+ Bij mij loopt de virtuele computer vast met een kernel panic. Dit wordt voorkomen door de virtuele computer te starten met:
+ VBoxSDL --startvm MinixBox --norawr0 --norawr3
+ 
+ Alle input wordt gecaptured, geef handmatig hostkey mee aan VBoxSDL:
+  stel de gewenste hostkey in
+  VBoxSDL --detecthostkey
+  
+  Geef de hostkey mee aan VBoxSDL (rechter alt bij mij):
+  VBoxSDL --hostkey 307 512 --startvm MinixBox --norawr0 --norawr3
+ 
+Standaard minix 3 installatie manual
+ http://wiki.minix3.org/en/UsersGuide/DoingInstallation#RunningSetup
