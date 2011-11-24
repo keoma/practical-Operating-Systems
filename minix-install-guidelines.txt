@@ -1,5 +1,5 @@
 
-Installatie virtual box onder Linux:
+Installatie virtual box onder Debian:
 
 -Toevoegen van virtual box sources aan /etc/apt/sources.list
  deb http://download.virtualbox.org/virtualbox/debian oneiric contrib
@@ -25,3 +25,46 @@ Installatie minix 3 in virtual box
  
 Standaard minix 3 installatie manual
  http://wiki.minix3.org/en/UsersGuide/DoingInstallation#RunningSetup
+ 
+ 
+ 
+--Installatie MINIX in VirtualBox onder Ubuntu 11.10
+[ref http://wiki.minix3.org/en/UsersGuide/RunningMinixOnVirtualBox]
+
+- Installeer VirtualBox en Download MINIX3.2
+[ref http://gforge.cs.vu.nl/gf/project/minix/tracker/?action=TrackerItemEdit&tracker_item_id=44]  (Waarom MINIX3.2 wordt gebruikt: "Fixed in svn" status).
+
+Het onderstaande uitvoeren als shell script, of steeds het commentaar vervangen door ";"
+sudo su                                                                                                 #Hier als SU omdat je anders na het downloaden nog het wachtwoord moet 
+                                                                                                        #intypen. Nu kun je rustig koffie gaan drinken. Waar veiligheid een issue 
+                                                                                                        #is kan "sudo su" en "exit" vervangen worden door een sudo voor "dpkg".
+cd Downloads                                                                                            #Simpelweg om je downloads georganiseerd te houden.
+wget http://download.virtualbox.org/virtualbox/4.1.6/virtualbox-4.1_4.1.6-74713~Ubuntu~oneiric_i386.deb #Download Virtualbox 4.1.6
+dpkg --install ./virtualbox-4.1_4.1.6-74713~Ubuntu~oneiric_i386.deb                                     #Installeer Virtualbox 4.1.6
+exit                                                                                                    #Exit "su".
+wget minix3_2_0_ide_20111118_c24d15b2db.iso.bz2                                                         #Download de MINIX3.2 iso.bz2
+tar -x minix3_2_0_ide_20111118_c24d15b2db.iso.bz2                                                       #Pak de iso uit.
+virtualbox                                                                                              #Start de VirtualBox grafische interface.
+
+
+- Maak een nieuwe VM met:
+
+Naam:                                       MINIX3
+OS:                                         Other
+Version:                                    Other
+RAM:                                        64MB                          #Minimaal 16MB. 64MB is in ieder geval genoeg om een X server te kunnen draaien.
+Harde schijf:                               Nieuw
+Schijf type:                                Dynamisch gealloceerd
+Schijf grootte:                             2GB
+
+- Voeg de ~/Downloads/minix_R3.1.8-r8398.iso toe aan de Minix3 VM via [menubalk]Machine->Settings->[tabblad]Storage->[icoon]"Add CD/DVD Device"->[knop]"Choose Disk"
+
+- Start de virtuele machine vanuit terminal (vanuit GUI starten geeft kernel panic):
+
+  VBoxSDL --startvm MINIX3 --norawr0 --norawr1
+
+De standaard host key is rechter control. Host key kan ingesteld worden met "--hostkey" bij het uitvoeren van VBoxSDL.
+
+- Volg de instructies om Minix3 te installeren. 
+LET OP! Kies voor de AMD Lance netwerkdriver. (Optie 8)
+[ref http://wiki.minix3.org/en/UsersGuide/DoingInstallation#RunningSetup]
