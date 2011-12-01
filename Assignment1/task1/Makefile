@@ -1,29 +1,18 @@
 all: picalc
 
-picalc: libcalc src/control.c
-<<<<<<< HEAD
-		mkdir -p bin/
-		gcc src/control.c -lpthread lib/pi.o -o bin/picalc -Wall
+picalc: libpi src/control.c
+		mkdir -p bin
+		gcc src/control.c -lpthread lib/pi.o -o bin/picalc
 		
 dummy: libdummy src/control.c
-		mkdir -p bin/
-		gcc src/control.c -lpthread lib/calculator.o -o bin/dummy -Wall
+		mkdir -p bin
 
 libdummy: src/calculator.c
-		mkdir -p lib/
-		gcc src/calculator.c -c -o lib/calculator.o -Wall
-		
-libpi: src/pi.c
-		mkdir -p lib/
-		gcc src/pi.c -c -o lib/pi.o -Wall
-=======
-		mkdir -p bin
-		gcc src/control.c -lpthread lib/calculator.o -o bin/picalc
-
-libcalc: src/calculator.c
 		mkdir -p lib
 		gcc src/calculator.c -c -o lib/calculator.o
->>>>>>> FETCH_HEAD
+
+libpi: src/pi.c
+		mkdir -p lib
 
 clean:
-		rm -rf lib/pi.o lib/calculator.o bin/picalc bin/dummy
+		rm -rf lib/pi.o bin/picalc
