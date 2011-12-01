@@ -1,12 +1,20 @@
 all: picalc
 
 picalc: libcalc src/control.c
-		mkdir -p /bin
-		gcc src/control.c -lpthread lib/calculator.o -o bin/picalc
+		mkdir -p bin/
+		gcc src/control.c -lpthread lib/pi.o -o bin/picalc -Wall
+		
+dummy: libdummy src/control.c
+		mkdir -p bin/
+		gcc src/control.c -lpthread lib/calculator.o -o bin/dummy -Wall
 
-libcalc: src/calculator.c
-		mkdir -p /lib
-		gcc src/calculator.c -c -o lib/calculator.o
+libdummy: src/calculator.c
+		mkdir -p lib/
+		gcc src/calculator.c -c -o lib/calculator.o -Wall
+		
+libpi: src/pi.c
+		mkdir -p lib/
+		gcc src/pi.c -c -o lib/pi.o -Wall
 
 clean:
-		rm -rf lib/*.o bin/picalc
+		rm -rf lib/pi.o lib/calculator.o bin/picalc bin/dummy
