@@ -15,8 +15,7 @@ void msort(task_t** tasks, int count){
 
 void merge(task_t** left, task_t** right, int leftsize, int rightsize)
 {	
-	task_t** tmp_left;
-	task_t** tmp_right;
+	task_t ** tmp_left, ** tmp_right;
 	
 	/* Allocate memory for a temporary left and right part of the task_t* pointers */
 	tmp_left = (task_t**) malloc( leftsize * sizeof(task_t*) );
@@ -65,6 +64,10 @@ void merge(task_t** left, task_t** right, int leftsize, int rightsize)
 		/* increment left point, which indicates the complete result */
 		left++;
 	}
+	
+	/* free the temporary memory blocks */
+	free(tmp_left);
+	free(tmp_right);
 }
 
 
