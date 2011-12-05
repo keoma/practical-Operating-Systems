@@ -1,5 +1,3 @@
-#include "control.h"
+long double pi_iteration();                                                                                    /*                                                                         */
 
-long double pi_iteration();
-
-void calculatepi(void*);
+void calculatepi(void*);                                                                                       /*Main calculation function                                                */
