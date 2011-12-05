@@ -14,7 +14,7 @@ libdummy: src/calculator.c
 
 libpi: src/pi.c
 		mkdir -p lib
-		gcc src/pi.c -c -o lib/pi.o -Wall
+		gcc src/pi.c -c -lpthread -o lib/pi.o -Wall
 
 clean:
 		rm -rf lib/pi.o lib/dummy.o bin/picalc bin/dummy
