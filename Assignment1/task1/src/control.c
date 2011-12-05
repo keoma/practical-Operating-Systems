@@ -1,68 +1,99 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <pthread.h>
-#include <unistd.h>  /* Necessary for the sleep function */
-#include "pi.h"
+#include <stdlib.h>                                                                                                                   /*Standard C library.                                                                              */
+#include <stdio.h>                                                                                                                    /*Standard IO library.                                                                             */
+#include <pthread.h>                                                                                                                  /*Used for threading and mutex locking.                                                            */
+#include <unistd.h>                                                                                                                   /*Used for sleep(int seconds);                                                                     */
+#include <ctype.h>                                                                                                                    /*Used for isalpha(char);                                                                          */
+#include <string.h>                                                                                                                   /*Used for strlen(char*);                                                                          */
+#include "control.h"                                                                                                                  /*Own header file. Defines struct argumentpasser.                                                  */
+#include "pi.h"                                                                                                                       /*This library does the actual calculation.                                                        */
+                                                                                                                                      /*Because it's implemented as a library it can easily be swapped out for a different algorithm.    */
+const long double real_pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;   /*Source: http://3.141592653589793238462643383279502884197169399375105820974944592.com/            */
+                                                                                                                                      /*Used to print the error just before the program exits.                                           */
 
-/*
- * source: http://3.141592653589793238462643383279502884197169399375105820974944592.com/
- */
-const long double real_pi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;
+char isnumeric(char* string, int length)                                                                                              /*Check wether a string is a valid integer.                                                        */
+{                                                                                                                                     /*                                                                                                 */
+ int i;                                                                                                                               /*Counter used to keep track of the current character.                                             */
+ for (i = 0; i < length; i++)                                                                                                         /*Loop trough the characters in the string.                                                        */
+ if (isalpha(string[i]))return 0;                                                                                                     /*Return zero if there's a single non-numerical character.                                         */
+ return 1;                                                                                                                            /*Return one if there were no non-numerical characters.                                            */
+}                                                                                                                                     /*                                                                                                 */
 
-int main(int argc, char* argv[])                                          /*main function*/
-{
- if (argc < 3)                                                            /*Too few arguments specified.*/
- {
-  puts("ERROR: Please specify the desired amount of iterations and the desired maximum running time.");/*Ask the user to specify the required arguments.*/
-  exit(-1);                                                               /*Exit with error status*/
- }
- if (argc > 3)                                                            /*Too many arguments specified.*/
- {
-  printf("WARNING: Disregarding %d trailing arguments.\n",argc - 2);      /*Warn the user that excess arguments have will be disregarded.*/
- }
- 
- int returncode;                                                          /*Return code for pthread_create. */
- pthread_t       pth_calculator;                                          /*The pthread that will run the calculation.*/
- pthread_attr_t  thread_attributes;                                       /*The attributes for the abovementioned pthread.*/
- busy = 1;                                                                /*Set busy to 1 MUST occur before pthread_create is called.*/
- struct_argpasser.pi = &pi;                                                /*Pointer to pi in the struct.*/
- struct_argpasser.seconds =  (unsigned long) atof(argv[2]);                                     /*Maximum amount of seconds the thread should run.*/
- struct_argpasser.busy = &busy;                                           /*Pointer to the busy variable.*/
- struct_argpasser.iteration = &iteration;                                 /*Pointer to the iteration variable.*/
- struct_argpasser.max_iterations = (unsigned long) atof(argv[1]);          /*Maximum amount of iterations the thread should run.*/
- pthread_attr_init(&thread_attributes);                                   /*Initialise the thread attributes with default settings.*/
- pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_JOINABLE);/*Explicitly state in the thread attributes, that the thread should be joinable.*/
- returncode = pthread_create(&pth_calculator,&thread_attributes,(void *) &calculatepi,&struct_argpasser);/*Creat the thread that calculates π.*/
- pthread_attr_destroy(&thread_attributes);                                /*Clean up the thread attributes (They are no longer needed).*/
- if (returncode)                                                          /*Returncode is not zero, so something went wrong while trying to create the thread.*/
- {
-  printf("ERROR: The return code from pthread_create() is %d.\n", returncode);/*Notify the user of the error.*/
-  exit(-1);                                                               /*Return with error status.*/
- }
-
-printf("Max iteration: %e\n", (double) struct_argpasser.max_iterations);
-
- while(busy)                                                              /*Check whether the calculation thread is still running.*/
- {
-  /* Significand precision of float is 52 bits 
-   * Assume rounding of errors for the 65-52=13 remaining long double bits
-   */
-  printf("Pi: %1.51f\n", (double) pi);                                /*Print π*/
-  sleep(1);                                                          /*Print the newline character.*/
- }
- 
- long status;                                                             /*The variable that will hold the pthread_join status.*/
- returncode = pthread_join(pth_calculator,(void *) &status );                       /*Wait for the calculation thread to exit*/
- if (returncode)                                                          /*Returncode is not zero, so something went wrong while trying to create the thread.*/
- {
-  printf("ERROR: The return code from pthread_join() is %d.\n", returncode);/*Notify the user of the error.*/
-  exit(-1);                                                               /*Return with error status.*/
- }
- printf("Joined with calculation thread with status: %ld\n",status);        /*Alert the user to the status of the join with the calculation thread.*/
- 
- printf("Pi: %1.51f\n", (double) pi);                                                 /*Print π */
- printf("Error calculating pi:\n %1.51f.", (double) (real_pi-pi) );                                                 /*Print error */
- puts("\n Exiting...");                                                   /*Print the newline character.*/
- pthread_exit(NULL);                                                      /*Taken from an example at https://computing.llnl.gov/tutorials/pthreads/ Not sure what it does.*/
- exit(0);                                                                 /*Exit correctly (in case the previous line didn't do it).*/
-}
+int main(int argc, char* argv[])                                                                                                      /*Main function.                                                                                   */
+{                                                                                                                                     /*                                                                                                 */
+ if (argc < 3)                                                                                                                        /*Too few arguments specified.                                                                     */
+ {                                                                                                                                    /*                                                                                                 */
+  puts("ERROR: Please specify the desired amount of iterations and the desired maximum running time.");                               /*Ask the user to specify the required arguments.                                                  */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+ if (argc > 3)                                                                                                                        /*Too many arguments specified.                                                                    */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("WARNING: Disregarding %d trailing arguments.\n",argc - 2);                                                                  /*Warn the user that excess arguments have will be disregarded.                                    */
+ }                                                                                                                                    /*                                                                                                 */
+ struct argumentpasser* struct_argpasser = malloc(sizeof(struct argumentpasser));                                                     /*Allocate the argument passing struct on the heap.                                                */
+ if (((struct_argpasser->mutex_pi = malloc(sizeof(pthread_mutex_t))) == NULL)                                                         /*Mutex to lock "pi" on the heap.                                                                  */
+ || ((struct_argpasser->mutex_busy = malloc(sizeof(pthread_mutex_t))) == NULL)                                                        /*Mutex to lock "busy" on the heap.                                                                */
+ || ((struct_argpasser->pi = malloc(sizeof(long double))) == NULL)                                                                    /*Variable that contains the calculated π on the heap.                                             */
+ || ((struct_argpasser->busy = malloc(sizeof(char))) == NULL))                                                                        /*The calculation thread sets this to zero to signal(thus heap) it has finished its calculations.  */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("ERROR: Out of memory.");                                                                                                    /*Notify the user that the system has run out of memory.                                           */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+ pthread_mutex_init(struct_argpasser->mutex_pi, NULL);                                                                                /*Initialise the mutex with default attributes.                                                    */
+ pthread_mutex_init(struct_argpasser->mutex_busy, NULL);                                                                              /*Initialise the mutex with default attributes.                                                    */
+ int returncode;                                                                                                                      /*Returncode for pthread_create and pthread_join.                                                  */
+ pthread_t       pth_calculator;                                                                                                      /*The pthread that will run the calculation.                                                       */
+ pthread_attr_t  thread_attributes;                                                                                                   /*The attributes for the abovementioned pthread.                                                   */
+ *(struct_argpasser->busy) = 1;                                                                                                       /*Set busy to 1 MUST occur before pthread_create is called.                                        */
+ if (isnumeric(argv[1],strlen(argv[2])))                                                                                              /*Check whether the argument is numeric.                                                           */
+ struct_argpasser->seconds = (unsigned long) atol(argv[2]);                                                                           /*Maximum amount of seconds the thread should run.                                                 */
+ else                                                                                                                                 /*Entered amount of seconds isn't a valid integer.                                                 */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("ERROR: Please specify a valid integer number of seconds.\n");                                                               /*Ask the user to enter the number of seconds in the correct format.                               */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+ if (isnumeric(argv[1],strlen(argv[1])))                                                                                              /*Check whether the argument is numeric.                                                           */
+ struct_argpasser->max_iterations = (unsigned long) atol(argv[1]);                                                                    /*Maximum amount of iterations the thread should run.                                              */
+ else                                                                                                                                 /*Entered amount of iterations isn't a valid integer.                                              */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("ERROR: Please specify a valid integer number of iterations.\n");                                                            /*Ask the user to enter the number of iterations in the correct format.                            */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+ pthread_attr_init(&thread_attributes);                                                                                               /*Initialise the thread attributes with default settings.                                          */
+ pthread_attr_setdetachstate(&thread_attributes, PTHREAD_CREATE_JOINABLE);                                                            /*Explicitly state in the thread attributes, that the thread should be joinable.                   */
+ returncode = pthread_create(&pth_calculator,&thread_attributes,(void *) &calculatepi,struct_argpasser);                              /*Create the thread that calculates π.                                                             */
+ pthread_attr_destroy(&thread_attributes);                                                                                            /*Clean up the thread attributes (They are no longer needed).                                      */
+ if (returncode)                                                                                                                      /*Returncode is not zero, so something went wrong while trying to create the thread.               */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("ERROR: The return code from pthread_create() is %d.\n", returncode);                                                        /*Notify the user of the error.                                                                    */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+                                                                                                                                      /*                                                                                                 */
+ printf("Max iteration: %ld\n", struct_argpasser->max_iterations);                                                                    /*Print the maximum amount of iterations.                                                          */
+ pthread_mutex_lock(struct_argpasser->mutex_busy);                                                                                    /*Lock mutex so "busy" can be read safely in the while statement.                                  */
+ while(*(struct_argpasser->busy))                                                                                                     /*Check whether the calculation thread is still running.                                           */
+ {                                                                                                                                    /*                                                                                                 */
+  pthread_mutex_unlock(struct_argpasser->mutex_busy);                                                                                 /*Unlock mutex since we are done reading "busy" for now.                                           */
+  pthread_mutex_lock(struct_argpasser->mutex_pi);                                                                                     /*Lock mutex so "pi" can be read safely.                                                           */
+                                                                                                                                      /*Significand precision of float is 52 bits.                                                       */
+                                                                                                                                      /*Assume roundoff errors for the 65-52=13 remaining long double bits.                              */
+  printf("Pi: %1.51f\n", (double) *(struct_argpasser->pi));                                                                           /*Print π.                                                                                         */
+  pthread_mutex_unlock(struct_argpasser->mutex_pi);                                                                                   /*Unlock mutex since we are done reading "pi" for now.                                             */
+  sleep(1);                                                                                                                           /*Wait for a second before printing the π again.                                                   */
+  pthread_mutex_lock(struct_argpasser->mutex_busy);                                                                                   /*Lock mutex so "busy" can be read safely in the while statement.                                  */
+ }                                                                                                                                    /*                                                                                                 */
+ pthread_mutex_unlock(struct_argpasser->mutex_pi);                                                                                    /*Unlock mutex since we are done reading "busy" for now.                                           */
+ long status;                                                                                                                         /*The variable that will hold the pthread_join status.                                             */
+ returncode = pthread_join(pth_calculator,(void *) &status );                                                                         /*Wait for the calculation thread to exit.                                                         */
+ if (returncode)                                                                                                                      /*Returncode is not zero, so something went wrong while trying to create the thread.               */
+ {                                                                                                                                    /*                                                                                                 */
+  printf("ERROR: The return code from pthread_join() is %d.\n", returncode);                                                          /*Notify the user of the error.                                                                    */
+  exit(-1);                                                                                                                           /*Exit with error status.                                                                          */
+ }                                                                                                                                    /*                                                                                                 */
+ printf("Joined with calculation thread with status: %ld\n",status);                                                                  /*Alert the user to the status of the join with the calculation thread.                            */
+                                                                                                                                      /*                                                                                                 */
+ printf("Pi: %1.51f\n", (double) *(struct_argpasser->pi));                                                                            /*Print π.                                                                                         */
+ printf("Error calculating pi:\n %1.51f.", (double) (real_pi-*(struct_argpasser->pi)) );                                              /*Print error.                                                                                     */
+ puts("\n Exiting...");                                                                                                               /*Print the newline character.                                                                     */
+ pthread_exit(NULL);                                                                                                                  /*Taken from an example at https://computing.llnl.gov/tutorials/pthreads/ Not sure what it does.   */
+ exit(0);                                                                                                                             /*Exit correctly (in case the previous line didn't do it).                                         */
+}                                                                                                                                     /*                                                                                                 */
